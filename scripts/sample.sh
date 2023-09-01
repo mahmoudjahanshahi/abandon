@@ -30,11 +30,18 @@ for i in {0..127}; do
         <(zcat /da?_data/basemaps/gz/c2PtAbflDefFullU"$i".s | ~/lookup/lsort 50G -t\; -k2,2);
 done |
 ~/lookup/lsort 50G -t\; -u |
-gzip >data/P2ctAbflDef.s;
+gzip >data/P2ctAbflDef.s; # wc -l 6170
 
 #dependant projects
 LC_ALL=C LANG=C join -t\; \
     <(zcat data/P2Def.s | cut -d\; -f2 | ~/lookup/lsort 10G -u) \
     <(zcat /da5_data/play/releases/Pkg2PFullU.s | ~/lookup/lsort 50G -t\;) |
 ~/lookup/lsort 50G -t\; -u |   
-gzip >data/Pkg2P.s;
+gzip >data/Pkg2P.s; # wc -l 191132 #join: /proc/self/fd/15:11: is not sorted: C:";bobrippling_ucc-c-compiler
+for i in {0..127}; do
+    LC_ALL=C LANG=C join -t\; -2 2 \
+        <(zcat data/Pkg2P.s | cut -d\; -f2 | ~/lookup/lsort 10G -u) \
+        <(zcat /da?_data/basemaps/gz/c2PtAbflPkgFullU"$i".s | ~/lookup/lsort 50G -t\; -k2,2);
+done |
+~/lookup/lsort 50G -t\; -u |
+gzip >data/P2ctAbflPkg.s;
