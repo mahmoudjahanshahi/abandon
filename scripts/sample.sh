@@ -16,7 +16,7 @@ join -t\; -a1 -1 2 -2 1 -o 1.1 1.2 2.2\
     <(zcat data/tmp/p2P.s) \
     <(zcat data/tmp/P2p.s) |
 ~/lookup/lsort 10G -t\; -u |
-gzip >data/p2P2p.s; # wc -l 6881
+gzip >data/p2P2p.s; # wc -l 6,881
 
 # defined packages
 ## based on Def2PFullU
@@ -32,19 +32,19 @@ for i in {0..127}; do
         <(zcat /da?_data/basemaps/gz/c2PtAbflDefFullU"$i".s | ~/lookup/lsort 50G -t\; -k2,2);
 done |
 ~/lookup/lsort 50G -t\; -u |
-gzip >data/P2ctAbflDef.s; # wc -l 6170
+gzip >data/P2ctAbflDef.s; # wc -l 6,170
 zcat data/P2ctAbflDef.s |
 awk -F\; '{print $1";"$7":"$8}' |
 ~/lookup/lsort 50G -t\; -u |   
 gzip >data/P2Def2.s; # wc -l 188
 
 # dependant projects
-## P2Def
+## P2Def : not valid (join error)
 LC_ALL=C LANG=C join -t\; \
     <(zcat data/P2Def.s | cut -d\; -f2 | ~/lookup/lsort 10G -u) \
     <(zcat /da5_data/play/releases/Pkg2PFullU.s | ~/lookup/lsort 50G -t\;) |
 ~/lookup/lsort 50G -t\; -u |   
-gzip >data/Pkg2P.s; # wc -l 191132 # 187720 uniq P #join: /proc/self/fd/15:11: is not sorted: C:";bobrippling_ucc-c-compiler
+gzip >data/Pkg2P.s; # wc -l 191,132 # 187,720 uniq P #join: /proc/self/fd/15:11: is not sorted: C:";bobrippling_ucc-c-compiler
 for i in {0..127}; do
     LC_ALL=C LANG=C join -t\; -2 2 \
         <(zcat data/Pkg2P.s | cut -d\; -f2 | ~/lookup/lsort 10G -u) \
@@ -55,13 +55,14 @@ gzip >data/P2ctAbflPkg.s; # wc -l 95,641,767
 zcat data/P2ctAbflPkg.s |
 awk -F\; '{OFS=";";for (i=8;i<=NF;++i)print $1,$2,$3,$4,$5,$6,$7,$i}' |
 ~/lookup/splitSecCh.perl data/tmp/P2ctAbflPkg. 127 ;
+
 ## P2Def2
-### Pkg2P
+### Pkg2P : not valid (join error)
 LC_ALL=C LANG=C join -t\; \
     <(zcat data/P2Def2.s | cut -d\; -f2 | cut -d: -f2 |  ~/lookup/lsort 10G -u) \
     <(zcat /da5_data/play/releases/Pkg2PFullU.s | awk -F: '{if ($1=="JS") print $2}'| ~/lookup/lsort 50G -t\; -u) |
 ~/lookup/lsort 50G -t\; -u |   
-gzip >data/Pkg2P2.s;
+gzip >data/Pkg2P2.s; # wc -l 7,519,128 # join: /proc/self/fd/15:121: is not sorted:  FRONTEND;wikiavec_kvc-web
 ### c2PtAbflPkg
 for i in {0..127}; do
     LC_ALL=C LANG=C join -t\; -2 8 \
@@ -70,4 +71,11 @@ for i in {0..127}; do
             awk -F\; '{OFS=";";if ($7=="JS") {for (i=8;i<=NF;++i)print $1,$2,$3,$4,$5,$6,$7,$i}}' |
             ~/lookup/lsort 50G -t\; -k8);
 done |
-gzip >data/Pkg2cPtAbfl.s;
+gzip >data/Pkg2cPtAbfl.s; # wc -l 409,465,067 
+start=$(date +%s);
+zcat data/Pkg2cPtAbfl.s | 
+cut -d\; -f1,3 | 
+~/lookup/lsort 60G -t\; -u |
+gzip >data/Pkg2P3.s; # wc -l 42,439,967 # uniq P wc -l 4,363,972
+end=$(date +%s);
+echo "Elapsed time: $((end - start)) seconds";
