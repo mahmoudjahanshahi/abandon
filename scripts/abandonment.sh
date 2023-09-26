@@ -7,7 +7,8 @@ batch=ab;
 start=$(date +%s);
 tail -n +2 <data/main/dependencyAbandonmentSampleComplete.csv |
 cut -d\, -f1 |
-sed 's|/|_|1' |
+sed 's|/|_|1;s|/.*||' |
+~/lookup/lsort 10G -u | # 4,108
 ~/lookup/getValues -f p2P |
 ~/lookup/lsort 10G -t\; -k2,2 |
 gzip >data/tmp/p2P.${batch}.${ver};
@@ -54,6 +55,31 @@ for i in {0..127}; do
         <(zcat /da?_data/basemaps/gz/c2PtAbflDefFullU"$i".s | ~/lookup/lsort 50G -t\; -k2,2);
 done |
 ~/lookup/lsort 50G -t\; -u |
-gzip >data/main/P2ctAbflDef.${batch}.${ver}; 
+gzip >data/main/P2ctAbflDef.${batch}.${ver}; # 1,078,538
 end=$(date +%s);
 echo "Elapsed time: $((end - start)) seconds"; # 2,213 seconds
+
+# dependent projects
+## only JS
+zcat data/main/P2ctAbflDef.${batch}.${ver} |
+awk -F\; '{print $1";"$7":"$8}' |
+~/lookup/lsort 50G -t\; -u |   
+grep ";JS:" |
+gzip >data/tmp/P2Def.${batch}.${ver}; # 16,589
+## c2PtAbflPkg
+start=$(date +%s);
+for i in {0..127}; do
+    LC_ALL=C LANG=C join -t\; -2 8 \
+        <(zcat data/tmp/P2Def.${batch}.${ver} | cut -d\; -f2 | cut -d: -f2 | ~/lookup/lsort 10G -u) \
+        <(zcat /da?_data/basemaps/gz/c2PtAbflPkgFullU"$i".s | 
+            awk -F\; '{OFS=";";if ($7=="JS") {for (i=8;i<=NF;++i)print $1,$2,$3,$4,$5,$6,$7,$i}}' |
+            ~/lookup/lsort 50G -t\; -k8);
+done |
+gzip >data/main/Pkg2cPtAbfl.${batch}.${ver}; 
+end=$(date +%s);
+echo "Elapsed time: $((end - start)) seconds";
+
+zcat data/main/Pkg2cPtAbfl.${batch}.${ver} | 
+cut -d\; -f1,3 | 
+~/lookup/lsort 60G -t\; -u |
+gzip >data/main/Pkg2P.${batch}.${ver}; 
