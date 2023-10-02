@@ -66,7 +66,7 @@ awk -F\; '{print $1";"$7":"$8}' |
 ~/lookup/lsort 50G -t\; -u |   
 grep ";JS:" |
 gzip >data/tmp/P2Def.${batch}.${ver}; # 16,589
-## c2PtAbflPkg
+## Pkg2cPtAbfl
 start=$(date +%s);
 for i in {0..127}; do
     LC_ALL=C LANG=C join -t\; -2 8 \
@@ -77,9 +77,12 @@ for i in {0..127}; do
 done |
 gzip >data/main/Pkg2cPtAbfl.${batch}.${ver}; 
 end=$(date +%s);
-echo "Elapsed time: $((end - start)) seconds";
-
+echo "Elapsed time: $((end - start)) seconds"; # 505,565 seconds , 5.85 days
+## Pkg2P
+start=$(date +%s);
 zcat data/main/Pkg2cPtAbfl.${batch}.${ver} | 
 cut -d\; -f1,3 | 
 ~/lookup/lsort 60G -t\; -u |
-gzip >data/main/Pkg2P.${batch}.${ver}; 
+gzip >data/main/Pkg2P.${batch}.${ver};
+end=$(date +%s);
+echo "Elapsed time: $((end - start)) seconds";
