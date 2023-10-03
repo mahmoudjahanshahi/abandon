@@ -25,22 +25,6 @@ gzip >data/main/p2P2p.${batch}.${ver}; # 1,073,434 # uniq P 3,977
 end=$(date +%s);
 echo "Elapsed time: $((end - start)) seconds"; # 16 seconds
 
-###
-tail -n +2 <data/main/dependencyAbandonmentSampleComplete.csv |
-cut -d\, -f1 |
-sed 's|/|_|1' |
-~/lookup/getValues -f p2P |
-~/lookup/lsort 10G -t\; |
-gzip >data/tmp/p2P.s1;
-tail -n +2 <data/main/dependencyAbandonmentSampleComplete.csv |
-cut -d\, -f1 |
-sed 's|/|_|1' |
-~/lookup/lsort 10G |
-LC_ALL=C LANG=C join -t\; - \
-    <(zcat /da?_data/basemaps/gz/p2PU.s | ~/lookup/lsort 60G -t\; -k1,1) |
-~/lookup/lsort 10G -t\; |
-gzip >data/tmp/p2P.s2;
-
 # defined packages
 ## only if p==P
 start=$(date +%s);
@@ -86,3 +70,16 @@ cut -d\; -f1,3 |
 gzip >data/main/Pkg2P.${batch}.${ver};
 end=$(date +%s);
 echo "Elapsed time: $((end - start)) seconds";
+
+# cleansing Def
+for i in {ab,up,vu}; do
+    zcat "data/tmp/P2Def.$i.U" |
+    cut -d\; -f2 | 
+    cut -d: -f2 | 
+    ~/lookup/lsort 10G -u |
+    awk '{if (length>1) print}' |
+    grep -v "^<%=.*%>$" |
+    grep -v "^<%.*%>$" |
+    grep -v "^{.*}" |
+    gzip >"data/tmp/Def.$i.U";
+done;
