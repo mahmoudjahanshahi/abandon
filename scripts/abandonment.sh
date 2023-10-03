@@ -71,15 +71,8 @@ gzip >data/main/Pkg2P.${batch}.${ver};
 end=$(date +%s);
 echo "Elapsed time: $((end - start)) seconds";
 
-# cleansing Def
-for i in {ab,up,vu}; do
-    zcat "data/tmp/P2Def.$i.U" |
-    cut -d\; -f2 | 
-    cut -d: -f2 | 
-    ~/lookup/lsort 10G -u |
-    awk '{if (length>1) print}' |
-    grep -v "^<%=.*%>$" |
-    grep -v "^<%.*%>$" |
-    grep -v "^{.*}" |
-    gzip >"data/tmp/Def.$i.U";
-done;
+# Target package list from original files
+tail -n +2 <data/main/dependencyAbandonmentSampleComplete.csv |
+cut -d\, -f2 |
+~/lookup/lsort 10G -u |
+gzip >data/tmp/tDef.${batch}.${ver}; # wc -l 4108
