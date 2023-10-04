@@ -44,7 +44,7 @@ for g in {c,t}; do
     for batch in {ab,up,vu}; do
         LC_ALL=C LANG=C join -t\; -1 2 -2 1 -o 1.1 1.2 2.2 \
             <(zcat "data/tmp/P2Def.$batch.$ver" | sed 's|;JS:|;|' | ~/lookup/lsort 50G -t\; -u -k2,2) \
-            <(zcat "data/tmp/Pkg2P.$batch.$ver.$g") |
+            <(zcat "data/tmp/Pkg2P.$batch.$ver.$g" | ~/lookup/lsort 50G -t\; -u -k1,1) |
         ~/lookup/lsort 50G -t\; -u |
         gzip >"data/main/P2Pkg2P.$batch.$ver.$g";
     done;
