@@ -59,7 +59,7 @@ for i in {0..127}; do
             awk -F\; '{OFS=";";if ($7=="JS") {for (i=8;i<=NF;++i)print $1,$2,$3,$4,$5,$6,$7,$i}}' |
             ~/lookup/lsort 50G -t\; -k8);
 done |
-gzip >data/main/Pkg2cPtAbfl.${batch}.${ver}; 
+gzip >data/main/Pkg2cPtAbfl.${batch}.${ver}; # wc -l 24,972,532,376
 end=$(date +%s);
 echo "Elapsed time: $((end - start)) seconds"; # 496,590 seconds, 5.75 days
 ## Pkg2P

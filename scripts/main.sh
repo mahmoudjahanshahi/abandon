@@ -14,3 +14,11 @@ for batch in {ab,up,vu}; do
     grep -v "^{.*}" |
     gzip >"data/tmp/Def.$batch.$ver";
 done;
+
+# splitting large files
+for batch in {ab,up,vu}; do
+    zcat data/Pkg2cPtAbfl.$batch.$ver | 
+    cut -d\; -f1,3 | 
+    uniq |
+    split - -d -l1000000000 --filter='gzip > $FILE.gz' data/split/Pkg2P.$batch.$ver. ;
+done;
