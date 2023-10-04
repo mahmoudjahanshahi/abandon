@@ -26,16 +26,16 @@ done;
 # joining with clean Def
 for batch in {ab,up,vu}; do
     LC_ALL=C LANG=C join -t\; \
-        <(zcat "data/tmp/Def.$batch.$ver") \
-        <(zcat "data/tmp/Pkg2P.$batch.$ver" | ~/lookup/lsort 50G -t\; -u) | 
+        <(zcat "data/tmp/Def.$batch.$ver" | ~/lookup/lsort 50G -u) \
+        <(zcat "data/tmp/Pkg2P.$batch.$ver" | ~/lookup/lsort 50G -t\; -u -k1,1) | 
     gzip >"data/tmp/Pkg2P.$batch.$ver.c";
 done;
 
 # joining with target Def
 for batch in {ab,up,vu}; do
     LC_ALL=C LANG=C join -t\; \
-        <(zcat "data/tmp/tDef.$batch.$ver") \
-        <(zcat "data/tmp/Pkg2P.$batch.$ver" | ~/lookup/lsort 50G -t\; -u) | 
+        <(zcat "data/tmp/tDef.$batch.$ver" | ~/lookup/lsort 50G -u) \
+        <(zcat "data/tmp/Pkg2P.$batch.$ver" | ~/lookup/lsort 50G -t\; -u -k1,1) | 
     gzip >"data/tmp/Pkg2P.$batch.$ver.t";
 done;
 
