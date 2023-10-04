@@ -22,3 +22,30 @@ for batch in {ab,up,vu}; do
     uniq |
     split - -d -l1000000000 --filter='gzip > $FILE.gz' data/split/Pkg2P.$batch.$ver. ;
 done;
+
+# joining with clean Def
+for batch in {ab,up,vu}; do
+    LC_ALL=C LANG=C join -t\; \
+        <(zcat "data/tmp/Def.$batch.$ver") \
+        <(zcat "data/tmp/Pkg2P.$batch.$ver" | ~/lookup/lsort 50G -t\; -u) | 
+    gzip >"data/tmp/Pkg2P.$batch.$ver.c";
+done;
+
+# joining with target Def
+for batch in {ab,up,vu}; do
+    LC_ALL=C LANG=C join -t\; \
+        <(zcat "data/tmp/tDef.$batch.$ver") \
+        <(zcat "data/tmp/Pkg2P.$batch.$ver" | ~/lookup/lsort 50G -t\; -u) | 
+    gzip >"data/tmp/Pkg2P.$batch.$ver.t";
+done;
+
+#joining with P2Def
+for g in {c,t}; do
+    for batch in {ab,up,vu}; do
+        LC_ALL=C LANG=C join -t\; -1 2 -2 1 -o 1.1 1.2 2.2 \
+            <(zcat "data/tmp/P2Def.$batch.$ver" | sed 's|;JS:|;|' | ~/lookup/lsort 50G -t\; -u -k2,2) \
+            <(zcat "data/tmp/Pkg2P.$batch.$ver.$g") |
+        ~/lookup/lsort 50G -t\; -u |
+        gzip >"data/main/P2Pkg2P.$batch.$ver.$g";
+    done;
+done;
