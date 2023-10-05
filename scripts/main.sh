@@ -31,11 +31,12 @@ for batch in {ab,up,vu}; do
     gzip >"data/tmp/Pkg2P.$batch.$ver.c";
 done;
 
-# joining with target Def
+# target def
 for batch in {ab,up,vu}; do
-    LC_ALL=C LANG=C join -t\; \
-        <(zcat "data/tmp/tDef.$batch.$ver" | ~/lookup/lsort 50G -u) \
-        <(zcat "data/tmp/Pkg2P.$batch.$ver" | ~/lookup/lsort 50G -t\; -u -k1,1) | 
+    for i in {0..127}; do
+        zcat "data/tmp/split/Pkg2P.$batch.$ver.$i.t";
+    done |
+    ~/lookup/lsort 50G -u -t\; |
     gzip >"data/tmp/Pkg2P.$batch.$ver.t";
 done;
 
@@ -47,5 +48,11 @@ for g in {c,t}; do
             <(zcat "data/tmp/Pkg2P.$batch.$ver.$g" | ~/lookup/lsort 50G -t\; -u -k1,1) |
         ~/lookup/lsort 50G -t\; -u |
         gzip >"data/main/P2Pkg2P.$batch.$ver.$g";
+    done;
+done;
+for g in {c,t}; do
+    for batch in {ab,up,vu}; do
+        n=$(zcat "data/main/P2Pkg2P.$batch.$ver.$g" | wc -l);
+        echo "# $batch $g wc -l: $n";
     done;
 done;
