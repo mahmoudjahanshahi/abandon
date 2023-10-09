@@ -87,7 +87,7 @@ for i in {0..127}; do
         gzip >"data/tmp/split/Pkg2P.$batch.$ver.$i.t";
 done;
 end=$(date +%s);
-echo "Elapsed time: $((end - start)) seconds";
+echo "Elapsed time: $((end - start)) seconds"; # 107324 seconds
 
 # Def
 start=$(date +%s);
@@ -101,4 +101,4 @@ for i in {0..127}; do
         gzip >"data/tmp/split/Pkg2P.$batch.$ver.$i.c";
 done;
 end=$(date +%s);
-echo "Elapsed time: $((end - start)) seconds";
+echo "Elapsed time: $((end - start)) seconds"; # 153855 seconds
