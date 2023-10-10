@@ -74,3 +74,11 @@ for batch in {ab,up,vu}; do
         <(zcat "data/tmp/Pkg2P.$batch.$ver.c" | ~/lookup/lsort 100G -t\; -u) |
     gzip >"data/main/P2Pkg2P.$batch.$ver.c";
 done;
+
+# uniq dP
+for batch in {ab,up,vu}; do
+    zcat "data/main/Pkg2P.$batch.$ver.t" | 
+    cut -d\; -f2 | 
+    ~/lookup/lsort 300G -t\; -u | 
+    gzip >"data/main/dP.$batch.$ver.t";
+done;
