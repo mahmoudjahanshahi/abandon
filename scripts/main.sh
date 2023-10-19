@@ -82,3 +82,26 @@ for batch in {ab,up,vu}; do
     ~/lookup/lsort 300G -t\; -u | 
     gzip >"data/main/dP.$batch.$ver.t";
 done;
+## replacing P with URL
+for batch in {ab,up,vu}; do
+    # finding other domains
+    zcat "data/main/dP.$batch.$ver.t" | 
+    sed 's|_|/|1' |
+    cut -d/ -f1 | 
+    grep "\." | 
+    sort -u |
+    sed 's|^|^|;s|$|/|' >"data/tmp/dPdomains.$batch.$ver.t";
+    # creating github urls
+    zcat "data/main/dP.$batch.$ver.t" | 
+    sed 's|_|/|1' |
+    grep -v -f "data/tmp/dPdomains.$batch.$ver.t" |
+    sed 's|^|github.com/|' |
+    ~/lookup/lsort 30G -u |
+    gzip >"data/main/dPgithub.$batch.$ver.t";
+    # creating other urls
+    zcat "data/main/dP.$batch.$ver.t" | 
+    sed 's|_|/|1' |
+    grep -f "data/tmp/dPdomains.$batch.$ver.t" |
+    ~/lookup/lsort 30G -u |
+    gzip >"data/main/dPother.$batch.$ver.t";
+done;
