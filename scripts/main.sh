@@ -105,3 +105,24 @@ for batch in {ab,up,vu}; do
     ~/lookup/lsort 30G -u |
     gzip >"data/main/dPother.$batch.$ver.t";
 done;
+
+# no dependency claim sample
+tail -n +2 <data/main/dependenciesNotInPackageJson.csv | 
+awk -F\" '{OFS=";";print $2,$4}' | 
+head >data/tmp/noDepsample.Pkg2P;
+for i in {0..127}; do
+    zcat /da?_data/basemaps/gz/c2PtAbflPkgFullU"$i".s | 
+    grep -f <(cut -d\; -f2 <data/tmp/noDepsample.Pkg2P | sed 's|^|;|;s|$|;|');
+done |
+gzip >data/tmp/c2PtAbflPkgFullU.noDepSample;
+while read -r l; do
+    p=$(echo $l | cut -d\; -f2);
+    d=$(echo $l | cut -d\; -f1);
+    zcat data/tmp/c2PtAbflPkgFullU.noDepSample | 
+    grep ";$p;" | 
+    grep ";$d" |
+    cut -d\; -f1,2,5,6 | 
+    awk -F\; -v d="$d" '{OFS=";";print d,$2,$1,$4,$3}';
+done <data/tmp/noDepsample.Pkg2P |
+sort -u |
+gzip >data/main/PkgP2cfb.noDepSample;
