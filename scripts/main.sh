@@ -126,3 +126,50 @@ while read -r l; do
 done <data/tmp/noDepsample.Pkg2P |
 sort -u |
 gzip >data/main/PkgP2cfb.noDepSample;
+
+# getting data with filenames (version V)
+ver=V
+for i in {0..127..4}; do
+    LC_ALL=C LANG=C join -t\; -2 3 \
+        <(zcat data/tmp/tDef.* | ~/lookup/lsort 10G -t\; -u) \
+        <(zcat /da?_data/basemaps/gz/c2PtabflPkgFull"$ver""$i".s |
+            awk -F\; '{OFS=";";IGNORECASE=1;if ($7=="JS" && $6 ~ /package.json$/) {for (i=8;i<=NF;++i) print $2,$6,$i}}' |
+            ~/lookup/lsort 50G -t\; -k3) |
+        ~/lookup/lsort 50G -t\; -u |
+        gzip >"data/tmp/split/Pkg2Pf.all.$ver.t.$i";
+done;
+zcat data/tmp/split/Pkg2Pf.all.$ver.t.* | 
+~/lookup/lsort 100G -t\; -u |
+gzip >data/main/Pkg2Pf.all.$ver.t;
+for batch in {ab,up,vu}; do
+    #joining with tDef
+    LC_ALL=C LANG=C join -t\; \
+        <(zcat "data/tmp/tDef.$batch.U" | ~/lookup/lsort 10G -t\; -u) \
+        <(zcat data/main/Pkg2Pf.all.$ver.t) |
+    gzip >"data/main/Pkg2Pf.$batch.$ver.t";
+    # uniq dP
+    zcat "data/main/Pkg2Pf.$batch.$ver.t" | 
+    cut -d\; -f2 | 
+    ~/lookup/lsort 100G -t\; -u | 
+    gzip >"data/main/dP.$batch.$ver.t";
+    # finding other domains
+    zcat "data/main/dP.$batch.$ver.t" | 
+    sed 's|_|/|1' |
+    cut -d/ -f1 | 
+    grep "\." | 
+    sort -u |
+    sed 's|^|^|;s|$|/|' >"data/tmp/dPdomains.$batch.$ver.t";
+    # creating github urls
+    zcat "data/main/dP.$batch.$ver.t" | 
+    sed 's|_|/|1' |
+    grep -v -f "data/tmp/dPdomains.$batch.$ver.t" |
+    sed 's|^|github.com/|' |
+    ~/lookup/lsort 30G -u |
+    gzip >"data/main/dPgithub.$batch.$ver.t";
+    # creating other urls
+    zcat "data/main/dP.$batch.$ver.t" | 
+    sed 's|_|/|1' |
+    grep -f "data/tmp/dPdomains.$batch.$ver.t" |
+    ~/lookup/lsort 30G -u |
+    gzip >"data/main/dPother.$batch.$ver.t";
+done;
