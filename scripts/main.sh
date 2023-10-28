@@ -135,8 +135,8 @@ for i in {0..127..4}; do
         <(zcat /da?_data/basemaps/gz/c2PtabflPkgFull"$ver""$i".s |
             awk -F\; '{OFS=";";IGNORECASE=1;if ($7=="JS" && $6 ~ /package.json$/) {for (i=8;i<=NF;++i) print $2,$6,$i}}' |
             ~/lookup/lsort 50G -t\; -k3) |
-        ~/lookup/lsort 50G -t\; -u |
-        gzip >"data/tmp/split/Pkg2Pf.all.$ver.t.$i";
+    ~/lookup/lsort 50G -t\; -u |
+    gzip >"data/tmp/split/Pkg2Pf.all.$ver.t.$i";
 done;
 zcat data/tmp/split/Pkg2Pf.all.$ver.t.* | 
 ~/lookup/lsort 100G -t\; -u |
@@ -151,25 +151,40 @@ for batch in {ab,up,vu}; do
     zcat "data/main/Pkg2Pf.$batch.$ver.t" | 
     cut -d\; -f2 | 
     ~/lookup/lsort 100G -t\; -u | 
-    gzip >"data/main/dP.$batch.$ver.t";
+    gzip >"data/tmp/dP.$batch.$ver.t";
     # finding other domains
-    zcat "data/main/dP.$batch.$ver.t" | 
+    zcat "data/tmp/dP.$batch.$ver.t" | 
     sed 's|_|/|1' |
     cut -d/ -f1 | 
     grep "\." | 
     sort -u |
     sed 's|^|^|;s|$|/|' >"data/tmp/dPdomains.$batch.$ver.t";
     # creating github urls
-    zcat "data/main/dP.$batch.$ver.t" | 
+    zcat "data/tmp/dP.$batch.$ver.t" | 
+    awk -F\; '{OFS=";";print $1,$1}' |
     sed 's|_|/|1' |
     grep -v -f "data/tmp/dPdomains.$batch.$ver.t" |
     sed 's|^|github.com/|' |
     ~/lookup/lsort 30G -u |
-    gzip >"data/main/dPgithub.$batch.$ver.t";
+    gzip >"data/tmp/dPgithub.$batch.$ver.t";
     # creating other urls
-    zcat "data/main/dP.$batch.$ver.t" | 
+    zcat "data/tmp/dP.$batch.$ver.t" | 
+    awk -F\; '{OFS=";";print $1,$1}' |
     sed 's|_|/|1' |
     grep -f "data/tmp/dPdomains.$batch.$ver.t" |
     ~/lookup/lsort 30G -u |
-    gzip >"data/main/dPother.$batch.$ver.t";
+    gzip >"data/tmp/dPother.$batch.$ver.t";
+    # consolidating dP urls
+    zcat "data/tmp/dPgithub.$batch.$ver.t" |
+    sed 's|^|github;|' |
+    gzip >"data/tmp/dUrlP.$batch.$ver.t";
+    zcat "data/tmp/dPother.$batch.$ver.t" |
+    sed 's|^|other;|' |
+    gzip >>"data/tmp/dUrlP.$batch.$ver.t";
+    # joining with Pkg2Pf
+    LC_ALL=C LANG=C join -t\; -1 3 -2 2 -o 2.1 2.3 2.2 1.1 1.2 \
+        <(zcat "data/tmp/dUrlP.$batch.$ver.t" | ~/lookup/lsort 100G -t\; -k3,3) \
+        <(zcat "data/main/Pkg2Pf.$batch.$ver.t" | ~/lookup/lsort 100G -t\; -k2,2) |
+    ~/lookup/lsort 200G -t\; -u | 
+    gzip >"data/main/Pkg2fPdu.$batch.$ver";
 done;
