@@ -186,5 +186,5 @@ for batch in {ab,up,vu}; do
         <(zcat "data/tmp/dUrlP.$batch.$ver.t" | ~/lookup/lsort 100G -t\; -k3,3) \
         <(zcat "data/main/Pkg2Pf.$batch.$ver.t" | ~/lookup/lsort 100G -t\; -k2,2) |
     ~/lookup/lsort 200G -t\; -u | 
-    gzip >"data/main/Pkg2fPdu.$batch.$ver";
+    gzip >"data/main/Pkg2fPdu.$batch.$ver.t";
 done;
